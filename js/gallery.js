@@ -101,21 +101,31 @@ gallery.style.padding = "100px 156px";
 gallery.style.margin = "0 auto";
 gallery.style.maxWidth = "1440px";
 
-gallery.addEventListener("click", clickOnGallery);
+const instance = basicLightbox.create(`
+  <img class="modal-image" src="" width="1112" height="640">`,
+  {
+    onShow: () => {
+      document.addEventListener("keydown", onRemoveListener);
+    },
+    onClose: () => {
+      document.removeEventListener("keydown", onRemoveListener);
+    },
+  }
+);
 
-function clickOnGallery(event) {
-  event.preventDefault();
-  console.log(event.target.dataset.source);
-
+function onRemoveListener(event) {
+  if (event.key === "Escape") {
+    instance.close()
+  }
 }
 
-const instance = basicLightbox.create(`
-    <div class="modal">
-        <p>
-            Your first lightbox with just a few lines of code.
-            Yes, it's really that simple.
-        </p>
-    </div>
-`)
+gallery.addEventListener("click", (event) => {
+  event.preventDefault();
+  if (event.target.nodeName !== "IMG") {
+    return;
+  }
+  const instanceImg = instance.element().querySelector(".modal-image");
+  instanceImg.src = event.target.dataset.source;
 
-instance.show()
+  instance.show();
+});
